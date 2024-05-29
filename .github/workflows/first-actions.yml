@@ -56,10 +56,4 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: prefect work-pool create default-agent-pool --type prefect:managed
-        
-      - name: Start Prefect Agent
-        env:
-          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: prefect agent start --pool "default-agent-pool" --work-queue "default"
