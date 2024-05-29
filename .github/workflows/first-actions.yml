@@ -1,6 +1,9 @@
 name: Deploy Prefect flow
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -9,21 +12,21 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.11'
+          python-version: '3.12' # Replace 'x' with your desired Python version
 
       - name: Install Prefect
         run: pip install -U prefect
 
       - name: Build Deployment
-        run: prefect deployment build -n my-first-deployment -f deployment.yaml flow.py:hello
+        run: prefect deployment build -n my-first-deployment flow.py:hello
 
       - name: Apply Deployment
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: prefect deployment apply deployment.yaml
+        run: prefect deployment apply ./*.yaml
