@@ -40,7 +40,7 @@ jobs:
       - name: Start Prefect Agent
         run: |
           # Start the agent in the background
-          nohup prefect agent start --pool "default-agent-pool" --work-queue "default" &
+          prefect agent start --pool "default-agent-pool" --work-queue "default" &
           
           # Wait for the agent to pick up and complete the job
           sleep 60
