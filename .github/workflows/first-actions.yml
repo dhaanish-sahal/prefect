@@ -38,6 +38,9 @@ jobs:
         run: prefect deployment run hello/my-first-deployment
 
       - name: Start Prefect Agent
+        env:
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: |
           # Start the agent in the background
           prefect agent start --pool "default-agent-pool" --work-queue "default" &
