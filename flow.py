@@ -1,6 +1,5 @@
 from prefect import flow
 
-#firs commit
 @flow(log_prints=True)
 def hello():
     print("Hello!")
