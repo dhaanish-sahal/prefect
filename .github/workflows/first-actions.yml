@@ -16,10 +16,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Prefect Deploy
+      - name: Install Prefect
+        run: pip install -U prefect
+
+      - name: Build Deployment
+        run: prefect deployment build -n my-first-deployment -f deployment.yaml flow.py:hello
+
+      - name: Apply Deployment
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: |
-          pip install -U prefect
-          python flow.py
+        run: prefect deployment apply deployment.yaml
