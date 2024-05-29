@@ -35,8 +35,7 @@ jobs:
         env:
           PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: prefect execute deployment --name my-first-deployment
-
+        run: prefect deployment run hello/my-first-deployment
   start-agent:
     name: Start Prefect Agent
     runs-on: ubuntu-latest
