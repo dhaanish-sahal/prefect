@@ -31,6 +31,12 @@ jobs:
           PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         run: prefect deployment apply ./*.yaml
 
+      - name: Execute Deployment
+        env:
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: prefect execute deployment --name my-first-deployment
+
   start-agent:
     name: Start Prefect Agent
     runs-on: ubuntu-latest
