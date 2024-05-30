@@ -44,23 +44,29 @@ jobs:
       run: |
         prefect deployment apply ./*.yaml
 
-    # - name: Execute Deployment
-    #     env:
-    #       PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-    #       PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-    #     run: prefect execute deployment --name my-first-deployment
+    - name: Start Prefect agent in the background
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+      run: |
+        nohup prefect agent start --pool "default-agent-pool" > agent.log 2>&1 &
 
     - name: Run Prefect deployment
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+      id: run-deployment
       run: |
-        # prefect execute deployment --name "Load Data to SQL Deployment"
-        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=MYFILE.csv
+        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv
 
-    - name: Start Prefect agent
+    - name: Wait for flow run to complete
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-      run: | 
-        prefect agent start --pool "default-agent-pool"
+      run: |
+        flow_run_id=$(prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv -q | grep -oP '(?<=Flow run created: )[a-f0-9-]+')
+        prefect flow-run wait-for-state $flow_run_id --state Completed --timeout 300
+
+    - name: Stop Prefect agent
+      run: |
+        pkill -f "prefect agent start"
