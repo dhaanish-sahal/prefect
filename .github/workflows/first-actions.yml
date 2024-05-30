@@ -58,9 +58,13 @@ jobs:
       run: |
         flow_run_output=$(prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv)
         echo "$flow_run_output"
-        flow_run_id=$(echo "$flow_run_output" | grep -oP '(?<=Flow run created: )[a-f0-9-]+')
+        flow_run_id=$(echo "$flow_run_output" | grep -oP '(?<=UUID: )[a-f0-9-]+')
+        if [ -z "$flow_run_id" ]; then
+          echo "Failed to extract flow run ID."
+          exit 1
+        fi
         echo "Flow Run ID: $flow_run_id"
-        prefect flow-run wait-for-state $flow_run_id --state Completed --timeout 300
+        prefect flow-run wait-for-state $flow_run_id --state Completed --timeout 300 || exit 1
 
     - name: Stop Prefect agent
       run: |
