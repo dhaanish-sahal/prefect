@@ -64,7 +64,29 @@ jobs:
           exit 1
         fi
         echo "Flow Run ID: $flow_run_id"
-        prefect flow-run wait-for-state $flow_run_id --state Completed --timeout 300 || exit 1
+
+        # Wait for flow run to complete
+        timeout=300
+        interval=10
+        elapsed=0
+        while [ $elapsed -lt $timeout ]; do
+          flow_run_status=$(prefect flow-run describe $flow_run_id --format json | jq -r '.state')
+          echo "Flow run status: $flow_run_status"
+          if [ "$flow_run_status" = "Completed" ]; then
+            echo "Flow run completed successfully."
+            break
+          elif [ "$flow_run_status" = "Failed" ]; then
+            echo "Flow run failed."
+            exit 1
+          fi
+          sleep $interval
+          elapsed=$((elapsed + interval))
+        done
+
+        if [ $elapsed -ge $timeout ]; then
+          echo "Timeout waiting for flow run to complete."
+          exit 1
+        fi
 
     - name: Stop Prefect agent
       run: |
