@@ -55,12 +55,12 @@ jobs:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        prefect execute deployment --name "Load Data to SQL Deployment"
-        # prefect deployment run "Load Data to SQL/Load Data to SQL Deployment"
+        # prefect execute deployment --name "Load Data to SQL Deployment"
+        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment"
 
     - name: Start Prefect agent
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        nohup prefect agent start --pool "default-agent-pool" &
+        prefect agent start --pool "default-agent-pool"
