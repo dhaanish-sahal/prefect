@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas sqlalchemy prefect pyodbc jq
+        pip install pandas sqlalchemy prefect pyodbc
 
     - name: Set up Prefect environment variables
       env:
@@ -44,50 +44,23 @@ jobs:
       run: |
         prefect deployment apply ./*.yaml
 
-    - name: Start Prefect agent in the background
+    # - name: Execute Deployment
+    #     env:
+    #       PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+    #       PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+    #     run: prefect execute deployment --name my-first-deployment
+
+    - name: Run Prefect deployment
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        nohup prefect agent start --pool "default-agent-pool" > agent.log 2>&1 &
+        # prefect execute deployment --name "Load Data to SQL Deployment"
+        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=MYFILE.csv
 
-    - name: Run Prefect deployment and wait for completion
+    - name: Start Prefect agent
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-      run: |
-        flow_run_output=$(prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv)
-        echo "$flow_run_output"
-        flow_run_id=$(echo "$flow_run_output" | grep -oP '(?<=UUID: )[a-f0-9-]+')
-        if [ -z "$flow_run_id" ]; then
-          echo "Failed to extract flow run ID."
-          exit 1
-        fi
-        echo "Flow Run ID: $flow_run_id"
-
-        # Wait for flow run to complete
-        timeout=300
-        interval=10
-        elapsed=0
-        while [ $elapsed -lt $timeout ]; do
-          flow_run_status=$(prefect flow-run inspect $flow_run_id --format json | jq -r '.state')
-          echo "Flow run status: $flow_run_status"
-          if [ "$flow_run_status" = "Completed" ]; then
-            echo "Flow run completed successfully."
-            break
-          elif [ "$flow_run_status" = "Failed" ]; then
-            echo "Flow run failed."
-            exit 1
-          fi
-          sleep $interval
-          elapsed=$((elapsed + interval))
-        done
-
-        if [ $elapsed -ge $timeout ]; then
-          echo "Timeout waiting for flow run to complete."
-          exit 1
-        fi
-
-    - name: Stop Prefect agent
-      run: |
-        pkill -f "prefect agent start"
+      run: | 
+        prefect agent start --pool "default-agent-pool"
