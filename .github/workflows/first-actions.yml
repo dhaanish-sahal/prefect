@@ -63,4 +63,4 @@ jobs:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: | 
-        nohup prefect agent start --pool "default-agent-pool" &
+        prefect agent start --pool "default-agent-pool"
