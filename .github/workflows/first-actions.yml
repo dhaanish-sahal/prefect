@@ -36,14 +36,14 @@ jobs:
       id: build-deployment
       run: |
         BUILD_OUTPUT=$(prefect deployment build copyfilefromlocaltosql:file_movement_flow -n "Load Data to SQL Deployment" | tail -n 1)
-        echo "::set-output name=deployment_file::$BUILD_OUTPUT"
+        echo "deployment_file=$BUILD_OUTPUT" >> $GITHUB_ENV
 
     - name: Apply Prefect deployment
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        prefect deployment apply ${{ steps.build-deployment.outputs.deployment_file }}
+        prefect deployment apply $deployment_file --upload
 
     - name: Run Prefect deployment
       env:
