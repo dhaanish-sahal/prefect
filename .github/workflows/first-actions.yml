@@ -56,7 +56,7 @@ jobs:
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
         # prefect execute deployment --name "Load Data to SQL Deployment"
-        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment"
+        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=MYFILE.csv
 
     - name: Start Prefect agent
       env:
