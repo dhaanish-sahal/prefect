@@ -69,4 +69,4 @@ def file_movement_flow(file_path: str):
     create_table(file_data, TABLE_NAME, SCHEMA_NAME)
 
 if __name__ == "__main__":
-    file_movement_flow('C:\\Users\\DD2107\\Downloads\\MYFILE.csv')
+    file_movement_flow('MYFILE.csv')
