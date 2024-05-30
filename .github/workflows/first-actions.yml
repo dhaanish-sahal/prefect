@@ -43,7 +43,8 @@ jobs:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        prefect deployment apply $deployment_file --upload
+        prefect deployment apply $deployment_file
+
 
     - name: Run Prefect deployment
       env:
