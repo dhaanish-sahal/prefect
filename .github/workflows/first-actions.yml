@@ -51,20 +51,15 @@ jobs:
       run: |
         nohup prefect agent start --pool "default-agent-pool" > agent.log 2>&1 &
 
-    - name: Run Prefect deployment
-      env:
-        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-      id: run-deployment
-      run: |
-        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv
-
-    - name: Wait for flow run to complete
+    - name: Run Prefect deployment and wait for completion
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
-        flow_run_id=$(prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv -q | grep -oP '(?<=Flow run created: )[a-f0-9-]+')
+        flow_run_output=$(prefect deployment run "Load Data to SQL/Load Data to SQL Deployment" --param file_path=./MYFILE.csv)
+        echo "$flow_run_output"
+        flow_run_id=$(echo "$flow_run_output" | grep -oP '(?<=Flow run created: )[a-f0-9-]+')
+        echo "Flow Run ID: $flow_run_id"
         prefect flow-run wait-for-state $flow_run_id --state Completed --timeout 300
 
     - name: Stop Prefect agent
