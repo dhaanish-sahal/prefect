@@ -62,5 +62,5 @@ jobs:
       env:
         PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-      run: |
-        prefect agent start --pool "default-agent-pool"
+      run: | 
+        nohup prefect agent start --pool "default-agent-pool" &
