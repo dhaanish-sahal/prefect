@@ -1,4 +1,4 @@
-name: Deploy Prefect flow
+name: CI/CD
 
 on:
   push:
@@ -6,54 +6,41 @@ on:
       - master
 
 jobs:
-  deploy:
-    name: Deploy
+  deploy-and-run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12' # Replace 'x' with your desired Python version
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
 
-      - name: Install Prefect
-        run: pip install -U prefect
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas sqlalchemy prefect pyodbc
 
-      - name: Build Deployment
-        run: prefect deployment build -n my-first-deployment flow.py:hello
+    - name: Set up Prefect environment variables
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+      run: echo "Prefect environment variables set."
 
-      - name: Apply Deployment
-        env:
-          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: prefect deployment apply ./*.yaml
+    - name: Build Prefect deployment
+      run: |
+        prefect deployment build copyfilefromlocaltosql:file_movement_flow -n "Load Data to SQL Deployment" -o deployment.yaml
 
-      - name: Execute Deployment
-        env:
-          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: prefect deployment run hello/my-first-deployment
+    - name: Apply Prefect deployment
+      run: |
+        prefect deployment apply deployment.yaml
 
-      - name: Start Prefect Agent
-        env:
-          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
-          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
-        run: |
-          # Start the agent in the background
-          prefect agent start --pool "default-agent-pool" --work-queue "default" &
-          
-          # Wait for the agent to pick up and complete the job
-          sleep 60
-          
-          # Check agent logs (optional)
-          tail -n 50 nohup.out
+    - name: Run Prefect deployment
+      run: |
+        prefect deployment run Load Data to SQL Deployment
 
-      - name: Stop Prefect Agent
-        run: |
-          # Find the process ID of the Prefect agent and stop it
-          AGENT_PID=$(pgrep -f 'prefect agent start')
-          echo "Stopping agent with PID: $AGENT_PID"
-          kill $AGENT_PID
+    - name: Start Prefect agent
+      run: |
+        nohup prefect agent start --pool "default-agent-pool" &
