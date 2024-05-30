@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas sqlalchemy prefect pyodbc
+        pip install pandas sqlalchemy prefect pyodbc jq
 
     - name: Set up Prefect environment variables
       env:
@@ -70,7 +70,7 @@ jobs:
         interval=10
         elapsed=0
         while [ $elapsed -lt $timeout ]; do
-          flow_run_status=$(prefect flow-run describe $flow_run_id --format json | jq -r '.state')
+          flow_run_status=$(prefect flow-run inspect $flow_run_id --format json | jq -r '.state')
           echo "Flow run status: $flow_run_status"
           if [ "$flow_run_status" = "Completed" ]; then
             echo "Flow run completed successfully."
