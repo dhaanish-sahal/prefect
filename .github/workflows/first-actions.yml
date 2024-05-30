@@ -3,7 +3,10 @@ name: CI/CD
 on:
   push:
     branches:
-      - master
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy-and-run:
@@ -29,13 +32,17 @@ jobs:
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: echo "Prefect environment variables set."
 
-    - name: Deploy Prefect flow
+    - name: Build Prefect deployment
       run: |
-        prefect deploy flow --file copyfilefromlocaltosql.py --name "Load Data to SQL Deployment"
+        prefect deployment build copyfilefromlocaltosql:file_movement_flow -n "Load Data to SQL Deployment"
 
-    - name: Run Prefect flow
+    - name: Apply Prefect deployment
       run: |
-        prefect run flow "Load Data to SQL Deployment"
+        prefect deployment apply deployment.yaml
+
+    - name: Run Prefect deployment
+      run: |
+        prefect deployment run "Load Data to SQL/Load Data to SQL Deployment"
 
     - name: Start Prefect agent
       run: |
