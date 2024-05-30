@@ -30,17 +30,29 @@ jobs:
       run: echo "Prefect environment variables set."
 
     - name: Build Prefect deployment
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
         prefect deployment build copyfilefromlocaltosql:file_movement_flow -n "Load Data to SQL Deployment"
 
     - name: Apply Prefect deployment
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
         prefect deployment apply deployment.yaml
 
     - name: Run Prefect deployment
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
         prefect deployment run "Load Data to SQL/Load Data to SQL Deployment"
 
     - name: Start Prefect agent
+      env:
+        PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: |
         nohup prefect agent start --pool "default-agent-pool" &
