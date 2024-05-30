@@ -29,17 +29,13 @@ jobs:
         PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
       run: echo "Prefect environment variables set."
 
-    - name: Build Prefect deployment
+    - name: Deploy Prefect flow
       run: |
-        prefect deployment build copyfilefromlocaltosql:file_movement_flow -n "Load Data to SQL Deployment" -o deployment.yaml
+        prefect deploy flow --file copyfilefromlocaltosql.py --name "Load Data to SQL Deployment"
 
-    - name: Apply Prefect deployment
+    - name: Run Prefect flow
       run: |
-        prefect deployment apply deployment.yaml
-
-    - name: Run Prefect deployment
-      run: |
-        prefect deployment run Load Data to SQL Deployment
+        prefect run flow "Load Data to SQL Deployment"
 
     - name: Start Prefect agent
       run: |
